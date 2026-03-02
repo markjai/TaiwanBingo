@@ -6,6 +6,8 @@ from scipy import stats
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from taiwan_bingo.db.crud.bingo import get_all_numbers
+from math import comb
+
 from taiwan_bingo.schemas.statistics import (
     BiasReport,
     ColdNumber,
@@ -15,6 +17,10 @@ from taiwan_bingo.schemas.statistics import (
     NumberFrequency,
     NumberGap,
     PairFrequency,
+    PickNCombination,
+    PickNExpectedValue,
+    PickNHitAnalysis,
+    PickNRecommendation,
     SectorAnalysis,
     SectorStats,
 )
@@ -196,4 +202,138 @@ async def get_bias_report(
         biased_numbers=biased,
         expected_frequency=round(expected, 2),
         actual_frequencies=observed,
+    )
+
+
+def _theoretical_full_hit_rate(pick_count: int) -> float:
+    """P(all pick_count numbers hit) = C(20,N) / C(80,N)"""
+    return comb(20, pick_count) / comb(80, pick_count)
+
+
+async def get_pick_n_hit_analysis(
+    session: AsyncSession,
+    pick_count: int,
+    window: int = 1000,
+) -> PickNHitAnalysis:
+    history = await get_all_numbers(session, limit=window)
+    if not history:
+        return PickNHitAnalysis(
+            pick_count=pick_count,
+            window=0,
+            theoretical_full_hit_rate=_theoretical_full_hit_rate(pick_count),
+            hot_numbers_used=[],
+            hit_distribution={},
+            full_hit_count=0,
+            full_hit_rate=0.0,
+        )
+
+    counter: Counter[int] = Counter(n for draw in history for n in draw)
+    hot_numbers = [n for n, _ in counter.most_common(pick_count)]
+
+    hit_dist: dict[str, int] = {str(i): 0 for i in range(pick_count + 1)}
+    full_hits = 0
+    hot_set = set(hot_numbers)
+    for draw in history:
+        hits = len(hot_set & set(draw))
+        hit_dist[str(hits)] = hit_dist.get(str(hits), 0) + 1
+        if hits == pick_count:
+            full_hits += 1
+
+    total = len(history)
+    return PickNHitAnalysis(
+        pick_count=pick_count,
+        window=total,
+        theoretical_full_hit_rate=round(_theoretical_full_hit_rate(pick_count), 8),
+        hot_numbers_used=sorted(hot_numbers),
+        hit_distribution=hit_dist,
+        full_hit_count=full_hits,
+        full_hit_rate=round(full_hits / total, 8) if total else 0.0,
+    )
+
+
+async def get_pick_n_hot_combinations(
+    session: AsyncSession,
+    pick_count: int,
+    window: int = 500,
+    top_n: int = 20,
+) -> list[PickNCombination]:
+    window = min(window, 500)
+    history = await get_all_numbers(session, limit=window)
+    if not history:
+        return []
+
+    counter: Counter[tuple[int, ...]] = Counter()
+    for draw in history:
+        for combo in combinations(sorted(draw), pick_count):
+            counter[combo] += 1
+
+    total = len(history)
+    return [
+        PickNCombination(
+            numbers=list(combo),
+            count=cnt,
+            percentage=round(cnt / total * 100, 4) if total else 0.0,
+        )
+        for combo, cnt in counter.most_common(top_n)
+    ]
+
+
+async def get_pick_n_recommend(
+    session: AsyncSession,
+    pick_count: int,
+    window: int = 200,
+) -> PickNRecommendation:
+    history = await get_all_numbers(session, limit=window)
+    if not history:
+        return PickNRecommendation(
+            pick_count=pick_count,
+            recommended_numbers=[],
+            scores=[],
+            rationale="No data available",
+        )
+
+    total = len(history)
+    freq: Counter[int] = Counter(n for draw in history for n in draw)
+    max_freq = max(freq.values()) if freq else 1
+
+    pair_counter: Counter[tuple[int, int]] = Counter()
+    for draw in history:
+        for pair in combinations(sorted(draw), 2):
+            pair_counter[pair] += 1
+
+    scores: dict[int, float] = {}
+    for num in range(1, MAX_NUM + 1):
+        freq_score = freq.get(num, 0) / max_freq
+        related = [
+            cnt for (a, b), cnt in pair_counter.items() if a == num or b == num
+        ]
+        pair_score = (sum(related) / len(related)) / total if related else 0.0
+        scores[num] = round(freq_score * 0.6 + pair_score * 0.4, 6)
+
+    top = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:pick_count]
+    recommended = sorted(n for n, _ in top)
+    rec_scores = [scores[n] for n in recommended]
+
+    return PickNRecommendation(
+        pick_count=pick_count,
+        recommended_numbers=recommended,
+        scores=rec_scores,
+        rationale=f"基於近 {total} 期頻率(60%)與配對親和力(40%)綜合評分，推薦 {pick_count} 個號碼",
+    )
+
+
+async def get_pick_n_expected_value(
+    session: AsyncSession,
+    pick_count: int,
+    window: int = 1000,
+) -> PickNExpectedValue:
+    analysis = await get_pick_n_hit_analysis(session, pick_count=pick_count, window=window)
+    theoretical = _theoretical_full_hit_rate(pick_count)
+    observed = analysis.full_hit_rate
+    ratio = round(observed / theoretical, 4) if theoretical > 0 else 0.0
+    return PickNExpectedValue(
+        pick_count=pick_count,
+        theoretical_rate=round(theoretical, 8),
+        observed_rate=round(observed, 8),
+        improvement_ratio=ratio,
     )

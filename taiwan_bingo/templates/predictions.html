@@ -84,6 +84,73 @@
     </div>
   </div>
 
+  <!-- Pick-N Analysis -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-grid-3x3-gap me-2 text-purple" style="color:#9c27b0"></i>Pick-N 分析與 DQN 預測</span>
+          <div class="btn-group btn-group-sm" role="group" id="pickNTabs">
+            <button type="button" class="btn btn-outline-secondary active" onclick="setPickN(3)" id="pickTab3">3個</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="setPickN(4)" id="pickTab4">4個</button>
+            <button type="button" class="btn btn-outline-secondary" onclick="setPickN(5)" id="pickTab5">5個</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <!-- Left: DQN controls -->
+            <div class="col-md-4">
+              <div class="card border-0 bg-light h-100">
+                <div class="card-body">
+                  <h6 class="fw-bold mb-3"><i class="bi bi-robot me-1"></i>DQN 訓練控制</h6>
+                  <div class="d-grid gap-2 mb-3">
+                    <button class="btn btn-sm btn-outline-warning" id="dqnTrain3Btn" onclick="trainDQN(3)">
+                      <i class="bi bi-play-fill me-1"></i>訓練 Pick-3 DQN
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" id="dqnTrain4Btn" onclick="trainDQN(4)">
+                      <i class="bi bi-play-fill me-1"></i>訓練 Pick-4 DQN
+                    </button>
+                    <button class="btn btn-sm btn-outline-warning" id="dqnTrain5Btn" onclick="trainDQN(5)">
+                      <i class="bi bi-play-fill me-1"></i>訓練 Pick-5 DQN
+                    </button>
+                  </div>
+                  <div id="dqnTrainResult" class="small mb-3"></div>
+                  <hr>
+                  <h6 class="fw-bold mb-2"><i class="bi bi-lightning-charge me-1 text-warning"></i>DQN 預測</h6>
+                  <button class="btn btn-sm btn-info w-100 text-white" id="dqnPredictBtn" onclick="getDQNPrediction()">
+                    取得推薦號碼（Pick-<span id="dqnPredictN">3</span>）
+                  </button>
+                  <div id="dqnPredictResult" class="mt-2 small"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Analysis results -->
+            <div class="col-md-8">
+              <div class="d-flex gap-2 mb-3 flex-wrap">
+                <button class="btn btn-sm btn-outline-primary" onclick="loadPickNHitAnalysis()">
+                  <i class="bi bi-bar-chart me-1"></i>命中率分析
+                </button>
+                <button class="btn btn-sm btn-outline-success" onclick="loadPickNHotCombos()">
+                  <i class="bi bi-fire me-1"></i>熱門組合 Top-20
+                </button>
+                <button class="btn btn-sm btn-outline-info" onclick="loadPickNRecommend()">
+                  <i class="bi bi-star me-1"></i>AI 推薦號碼
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="loadPickNEV()">
+                  <i class="bi bi-calculator me-1"></i>期望值分析
+                </button>
+              </div>
+              <div id="pickNResult">
+                <div class="text-center text-muted py-4 small">選擇分析類型以載入結果</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Backtest -->
   <div class="row mt-4">
     <div class="col-12">

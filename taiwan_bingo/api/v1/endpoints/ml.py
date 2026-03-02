@@ -6,6 +6,7 @@ from taiwan_bingo.schemas.ml import (
     TrainRequest,
     TrainResponse,
     PredictionResponse,
+    PickNPredictionResponse,
     ModelInfo,
     EvaluateResponse,
     BacktestRequest,
@@ -14,6 +15,7 @@ from taiwan_bingo.schemas.ml import (
 from taiwan_bingo.services.ml_service import (
     train_model,
     get_prediction,
+    get_dqn_prediction,
     list_models,
     evaluate_model,
     backtest_model,
@@ -64,3 +66,17 @@ async def backtest(
     db: AsyncSession = Depends(get_db),
 ):
     return await backtest_model(db, request)
+
+
+@router.get("/dqn-predict", response_model=PickNPredictionResponse, summary="DQN Pick-N 預測")
+async def dqn_predict(
+    pick_count: int = Query(3, ge=3, le=5, description="取幾個號碼 (3/4/5)"),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await get_dqn_prediction(db, pick_count=pick_count)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No trained DQN model found for pick_count={pick_count}. Train dqn_{pick_count} first.",
+        )
+    return result

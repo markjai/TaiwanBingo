@@ -1,6 +1,36 @@
 from pydantic import BaseModel
 
 
+class PickNCombination(BaseModel):
+    numbers: list[int]
+    count: int
+    percentage: float
+
+
+class PickNHitAnalysis(BaseModel):
+    pick_count: int
+    window: int
+    theoretical_full_hit_rate: float
+    hot_numbers_used: list[int]
+    hit_distribution: dict[str, int]
+    full_hit_count: int
+    full_hit_rate: float
+
+
+class PickNRecommendation(BaseModel):
+    pick_count: int
+    recommended_numbers: list[int]
+    scores: list[float]
+    rationale: str
+
+
+class PickNExpectedValue(BaseModel):
+    pick_count: int
+    theoretical_rate: float
+    observed_rate: float
+    improvement_ratio: float
+
+
 class NumberFrequency(BaseModel):
     number: int
     count: int

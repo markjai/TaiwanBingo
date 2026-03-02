@@ -68,3 +68,16 @@ class BacktestResponse(BaseModel):
     win_rate: float
     avg_hits: float
     results: list[BacktestSummary]
+
+
+class DQNTrainRequest(BaseModel):
+    pick_count: int = 3  # 3, 4, or 5
+    epochs: int = 50
+
+
+class PickNPredictionResponse(BaseModel):
+    pick_count: int
+    model_type: str
+    recommended_numbers: list[int]
+    q_values: list[float]
+    full_hit_probability_estimate: float

@@ -8,6 +8,7 @@ from taiwan_bingo.config import settings
 from taiwan_bingo.db.crud.bingo import get_all_numbers
 from taiwan_bingo.db.crud.ml import create_model_record, deactivate_model_type
 from taiwan_bingo.db.models.ml_record import MLModelRecord
+from taiwan_bingo.ml.models.dqn_model import DQNBingoModel
 from taiwan_bingo.ml.models.ensemble import EnsembleModel
 from taiwan_bingo.ml.models.frequency_model import FrequencyModel
 from taiwan_bingo.ml.models.lstm_model import LSTMModel
@@ -16,7 +17,12 @@ MODEL_MAP = {
     "frequency": FrequencyModel,
     "lstm": LSTMModel,
     "ensemble": EnsembleModel,
+    "dqn_3": None,   # handled specially below
+    "dqn_4": None,
+    "dqn_5": None,
 }
+
+_DQN_PICK = {"dqn_3": 3, "dqn_4": 4, "dqn_5": 5}
 
 
 async def train(
@@ -30,11 +36,14 @@ async def train(
 
     logger.info(f"Training {model_type} on {len(history)} draws")
 
-    cls = MODEL_MAP.get(model_type)
-    if cls is None:
+    if model_type not in MODEL_MAP:
         raise ValueError(f"Unknown model_type: {model_type!r}. Choose from {list(MODEL_MAP)}")
 
-    model = cls(pick_count=pick_count)
+    if model_type in _DQN_PICK:
+        model = DQNBingoModel(pick_count=_DQN_PICK[model_type])
+    else:
+        cls = MODEL_MAP[model_type]
+        model = cls(pick_count=pick_count)
     metrics = await model.train(history)
 
     # Save artifact

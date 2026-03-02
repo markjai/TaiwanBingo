@@ -10,6 +10,7 @@ from taiwan_bingo.schemas.ml import (
     BacktestSummary,
     EvaluateResponse,
     ModelInfo,
+    PickNPredictionResponse,
     PredictionResponse,
     TrainResponse,
 )
@@ -81,6 +82,38 @@ async def evaluate_model(
         total_predictions=len(evaluated),
         average_hits=round(sum(hits) / len(hits), 2),
         hit_distribution=dist,
+    )
+
+
+async def get_dqn_prediction(
+    session: AsyncSession,
+    pick_count: int = 3,
+) -> PickNPredictionResponse | None:
+    from taiwan_bingo.ml.inference.model_registry import load_model
+    from taiwan_bingo.ml.models.dqn_model import DQNBingoModel
+
+    model_type = f"dqn_{pick_count}"
+    model = await load_model(session, model_type)
+    if model is None or not isinstance(model, DQNBingoModel):
+        return None
+
+    history = await get_all_numbers(session, limit=2000)
+    if not history:
+        return None
+
+    recommended = await model.predict(history, pick_count=pick_count)
+    q_all = model.get_q_values(history)
+    q_vals = [round(float(q_all[n - 1]), 6) for n in recommended]
+
+    from math import comb
+    theoretical = comb(20, pick_count) / comb(80, pick_count)
+
+    return PickNPredictionResponse(
+        pick_count=pick_count,
+        model_type=model_type,
+        recommended_numbers=recommended,
+        q_values=q_vals,
+        full_hit_probability_estimate=round(theoretical, 8),
     )
 
 
