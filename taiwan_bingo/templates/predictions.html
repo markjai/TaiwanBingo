@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}ML 預測{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="fw-bold mb-4"><i class="bi bi-cpu text-info me-2"></i>機器學習預測</h2>
+
+  <div class="row g-4">
+    <!-- Train / Predict controls -->
+    <div class="col-md-5">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header"><i class="bi bi-gear me-2"></i>訓練模型</div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">模型類型</label>
+            <select class="form-select" id="trainModelType">
+              <option value="ensemble">Ensemble（推薦）</option>
+              <option value="frequency">Frequency</option>
+              <option value="lstm">LSTM</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">預測號碼數量</label>
+            <input type="number" class="form-control" id="trainPickCount" value="20" min="5" max="20">
+          </div>
+          <button class="btn btn-warning w-100" id="trainBtn" onclick="trainModel()">
+            <i class="bi bi-play-fill me-1"></i>開始訓練
+          </button>
+          <div id="trainResult" class="mt-3"></div>
+        </div>
+      </div>
+
+      <!-- Models list -->
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-list-ul me-2"></i>已訓練模型</div>
+        <div class="card-body p-0">
+          <div id="modelsList" style="max-height:250px; overflow-y:auto">
+            <div class="text-center text-muted py-3">載入中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prediction panel -->
+    <div class="col-md-7">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header"><i class="bi bi-lightning-charge me-2 text-warning"></i>取得預測號碼</div>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">模型類型</label>
+              <select class="form-select" id="predictModelType">
+                <option value="ensemble">Ensemble</option>
+                <option value="frequency">Frequency</option>
+                <option value="lstm">LSTM</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">號碼數量</label>
+              <input type="number" class="form-control" id="predictPickCount" value="20" min="5" max="20">
+            </div>
+          </div>
+          <button class="btn btn-info w-100 text-white" onclick="getPrediction()">
+            <i class="bi bi-cpu me-1"></i>預測下期號碼
+          </button>
+        </div>
+      </div>
+
+      <!-- Prediction result -->
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-check2-circle me-2 text-success"></i>預測結果</div>
+        <div class="card-body" id="predictionResult">
+          <div class="text-center text-muted py-4">尚無預測結果</div>
+        </div>
+      </div>
+
+      <!-- Confidence chart -->
+      <div class="card shadow-sm mt-4" id="confidenceCard" style="display:none">
+        <div class="card-header">信心分數分布</div>
+        <div class="card-body" style="height:240px">
+          <canvas id="confidenceChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backtest -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-graph-up-arrow me-2 text-primary"></i>模型回測</span>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label">模型類型</label>
+              <select class="form-select" id="btModelType">
+                <option value="ensemble">Ensemble</option>
+                <option value="frequency">Frequency</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">測試期數</label>
+              <input type="number" class="form-control" id="btTestSize" value="50" min="10" max="500">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">號碼數量</label>
+              <input type="number" class="form-control" id="btPickCount" value="20" min="5" max="20">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">中獎門檻</label>
+              <input type="number" class="form-control" id="btWinThreshold" value="8" min="1" max="20">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button class="btn btn-primary w-100" onclick="runBacktest()">
+                <i class="bi bi-play me-1"></i>執行回測
+              </button>
+            </div>
+          </div>
+          <div id="backtestResult"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/predictions.js"></script>
+{% endblock %}

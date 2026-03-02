@@ -1,0 +1,60 @@
+/* TaiwanBingo - Custom Styles */
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+  font-size: 1.3rem;
+  letter-spacing: .03em;
+}
+
+/* Number balls */
+.num-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: .85rem;
+  color: #fff;
+  user-select: none;
+}
+
+.num-ball.sector-1 { background: #0d6efd; }   /* 1-20  blue  */
+.num-ball.sector-2 { background: #198754; }   /* 21-40 green */
+.num-ball.sector-3 { background: #dc3545; }   /* 41-60 red   */
+.num-ball.sector-4 { background: #6f42c1; }   /* 61-80 purple*/
+.num-ball.hot { background: #fd7e14; }
+.num-ball.cold { background: #0dcaf0; color: #000; }
+
+/* Cards */
+.card {
+  border: none;
+  border-radius: .75rem;
+}
+
+.card-header {
+  background: #fff;
+  border-bottom: 1px solid #e9ecef;
+  font-weight: 600;
+  border-radius: .75rem .75rem 0 0 !important;
+}
+
+/* Table */
+.table th {
+  white-space: nowrap;
+}
+
+/* Footer */
+.footer {
+  font-size: .85rem;
+}
+
+/* Toast */
+.toast {
+  min-width: 280px;
+}

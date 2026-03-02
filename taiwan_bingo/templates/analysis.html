@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}統計分析{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="fw-bold mb-4"><i class="bi bi-bar-chart text-success me-2"></i>統計分析</h2>
+
+  <!-- Controls -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">分析窗口（期數）</label>
+          <select class="form-select" id="window">
+            <option value="50">近 50 期</option>
+            <option value="100" selected>近 100 期</option>
+            <option value="200">近 200 期</option>
+            <option value="500">近 500 期</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-success w-100" onclick="loadAllStats()">
+            <i class="bi bi-arrow-clockwise me-1"></i>重新載入
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Frequency chart -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>號碼出現頻率</div>
+        <div class="card-body" style="height:300px">
+          <canvas id="freqChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hot / Cold -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header"><i class="bi bi-fire me-2 text-warning"></i>熱門號碼 Top 10</div>
+        <div class="card-body">
+          <div id="hotNumbers" class="d-flex flex-wrap gap-2">載入中...</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header"><i class="bi bi-snow2 me-2 text-info"></i>冷門號碼 Top 10</div>
+        <div class="card-body">
+          <div id="coldNumbers" class="d-flex flex-wrap gap-2">載入中...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector distribution -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-grid me-2 text-info"></i>四區平均分布</div>
+        <div class="card-body" style="height:260px">
+          <canvas id="sectorBarChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bias report -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-activity me-2 text-danger"></i>卡方偏差檢定</div>
+        <div class="card-body" id="biasReport">載入中...</div>
+      </div>
+    </div>
+
+    <!-- Gap analysis -->
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header"><i class="bi bi-hourglass-split me-2 text-secondary"></i>遺漏值排行 Top 20</div>
+        <div class="card-body" style="height:280px">
+          <canvas id="gapChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/analysis.js"></script>
+{% endblock %}

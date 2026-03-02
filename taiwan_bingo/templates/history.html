@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}歷史開獎{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h2 class="fw-bold mb-4"><i class="bi bi-clock-history text-primary me-2"></i>歷史開獎紀錄</h2>
+
+  <!-- Filter -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">起始日期</label>
+          <input type="date" class="form-control" id="dateFrom">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">結束日期</label>
+          <input type="date" class="form-control" id="dateTo">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">每頁筆數</label>
+          <select class="form-select" id="pageSize">
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-primary w-100" onclick="loadHistory(1)">
+            <i class="bi bi-search me-1"></i>查詢
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between">
+      <span id="resultCount">共 0 筆</span>
+      <div id="pagination" class="d-flex gap-1"></div>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>期別</th>
+            <th>開獎時間</th>
+            <th>開獎號碼</th>
+            <th>總和</th>
+            <th>奇/偶</th>
+            <th>1-20</th>
+            <th>21-40</th>
+            <th>41-60</th>
+            <th>61-80</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="9" class="text-center py-5 text-muted">載入中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/history.js"></script>
+{% endblock %}
