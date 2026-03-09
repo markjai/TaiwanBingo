@@ -47,7 +47,7 @@ async function loadModelsList() {
           <span class="fw-bold">${m.model_type}</span>
           <span class="badge ${m.is_active ? 'bg-success' : 'bg-secondary'} ms-1">${m.is_active ? '使用中' : '已停用'}</span>
         </div>
-        <div class="text-muted">${new Date(m.trained_at).toLocaleDateString('zh-TW')}</div>
+        <div class="text-muted">${new Date(m.trained_at).toLocaleString('zh-TW', {timeZone:'Asia/Taipei', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false})}</div>
       </div>
     `).join('');
   } catch (e) {

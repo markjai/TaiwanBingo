@@ -9,7 +9,10 @@ from taiwan_bingo.db.models.bingo_draw import BingoDraw
 
 async def get_latest(session: AsyncSession) -> BingoDraw | None:
     result = await session.execute(
-        select(BingoDraw).order_by(BingoDraw.draw_datetime.desc()).limit(1)
+        select(BingoDraw)
+        .where(BingoDraw.draw_datetime <= func.now())
+        .order_by(BingoDraw.draw_datetime.desc())
+        .limit(1)
     )
     return result.scalar_one_or_none()
 
@@ -28,7 +31,7 @@ async def get_draws(
     date_from: date | None = None,
     date_to: date | None = None,
 ) -> tuple[list[BingoDraw], int]:
-    query = select(BingoDraw)
+    query = select(BingoDraw).where(BingoDraw.draw_datetime <= func.now())
     if date_from:
         query = query.where(func.date(BingoDraw.draw_datetime) >= date_from)
     if date_to:

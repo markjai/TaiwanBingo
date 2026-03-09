@@ -1,6 +1,22 @@
 // Dashboard page JS
 let sectorChart = null;
 
+function formatTerm(term) {
+  const s = String(term);
+  const year = s.slice(0, 3);
+  const num = parseInt(s.slice(3), 10);
+  return `${year}年 第${num.toLocaleString()}期`;
+}
+
+function formatTaiwanTime(utcStr) {
+  return new Date(utcStr).toLocaleString('zh-TW', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false,
+  });
+}
+
 async function loadDashboard() {
   try {
     const [latestRes, hotColdRes, modelsRes] = await Promise.all([
@@ -11,7 +27,7 @@ async function loadDashboard() {
 
     if (latestRes && latestRes.ok) {
       const d = await latestRes.json();
-      document.getElementById('latestTerm').textContent = `期別：${d.draw_term}`;
+      document.getElementById('latestTerm').textContent = `${formatTerm(d.draw_term)}　${formatTaiwanTime(d.draw_datetime)}`;
       document.getElementById('statSum').textContent = d.sum_total;
       document.getElementById('statOdd').textContent = d.odd_count;
       document.getElementById('statEven').textContent = d.even_count;

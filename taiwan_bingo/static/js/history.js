@@ -8,6 +8,22 @@ function sectorClass(n) {
   return 'sector-4';
 }
 
+function formatTerm(term) {
+  const s = String(term);
+  const year = s.slice(0, 3);
+  const num = parseInt(s.slice(3), 10);
+  return `${year}年 第${num.toLocaleString()}期`;
+}
+
+function formatTaiwanTime(utcStr) {
+  return new Date(utcStr).toLocaleString('zh-TW', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+    hour12: false,
+  });
+}
+
 async function loadHistory(page = 1) {
   currentPage = page;
   const pageSize = document.getElementById('pageSize').value;
@@ -29,8 +45,8 @@ async function loadHistory(page = 1) {
 
     tbody.innerHTML = data.items.map(d => `
       <tr>
-        <td class="text-monospace small">${d.draw_term}</td>
-        <td class="small">${new Date(d.draw_datetime).toLocaleString('zh-TW')}</td>
+        <td class="text-monospace small">${formatTerm(d.draw_term)}</td>
+        <td class="small">${formatTaiwanTime(d.draw_datetime)}</td>
         <td><div class="d-flex flex-wrap gap-1">${d.numbers.map(n => `<span class="num-ball ${sectorClass(n)}" style="width:28px;height:28px;font-size:.75rem">${n}</span>`).join('')}</div></td>
         <td>${d.sum_total}</td>
         <td>${d.odd_count}/${d.even_count}</td>
