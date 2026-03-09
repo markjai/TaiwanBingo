@@ -1,10 +1,8 @@
-from datetime import datetime
+from datetime import date
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from taiwan_bingo.db.crud.bingo import bulk_upsert
-from taiwan_bingo.db.models.scrape_log import ScrapeLog
 from taiwan_bingo.scraper.bingo_scraper import BingoScraper
 from taiwan_bingo.schemas.bingo import ScrapeStatusSchema
 
@@ -27,12 +25,15 @@ async def backfill_scrape(
     year_from: int,
     year_to: int,
 ) -> list[ScrapeStatusSchema]:
-    """Backfill data year by year, all 12 months."""
+    """Backfill data year by year (AD years), all 12 months."""
     results: list[ScrapeStatusSchema] = []
+    today = date.today()
+
     for year in range(year_from, year_to + 1):
         for month in range(1, 13):
-            if year == datetime.now().year - 1911 and month > datetime.now().month:
+            if date(year, month, 1) > today:
                 break
+            logger.info("Backfill: {}/{}", year, month)
             log = await _scraper.run_with_logging(
                 session, action="month", year=year, month=month
             )

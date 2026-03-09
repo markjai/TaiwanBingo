@@ -29,8 +29,8 @@ class PaginatedResponse(BaseModel):
 
 
 class ScrapeRequest(BaseModel):
-    year_from: int = 113   # ROC year
-    year_to: int = 114
+    year_from: int = 2024   # AD year 西元年
+    year_to: int = 2026
 
 
 class ScrapeStatusSchema(BaseModel):
